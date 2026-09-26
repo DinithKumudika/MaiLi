@@ -1,0 +1,116 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id            String          @id @default(cuid())
+  name          String?
+  email         String?         @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  // Optional for WebAuthn support
+  Authenticator Authenticator[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Optional for WebAuthn support
+model Authenticator {
+  credentialID         String  @unique
+  userId               String
+  providerAccountId    String
+  credentialPublicKey  String
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, credentialID])
+}
+
+// Custom Tables
+model Email {
+  email_id        String           @id // Gmail messageId
+  subject         String
+  from            String
+  content_hash    String           // SHA-256 of subject + from + body
+  
+  classifications Classification[]
+}
+
+model ClassificationModel {
+  model_id        String           @id @default(cuid())
+  name            String           // e.g., "JEV"
+  
+  classifications Classification[]
+}
+
+model Classification {
+  classification_id String               @id @default(cuid())
+  email_id          String
+  model_id          String
+  category          String
+  urgency           Int
+  needs_reply       Boolean
+  cost              Float?
+  input_tok         Int?
+  output_tok        Int?
+  speed             Float?             // tokens per second
+  
+  // Relations
+  email             Email                @relation(fields: [email_id], references: [email_id])
+  model             ClassificationModel  @relation(fields: [model_id], references: [model_id])
+  
+  @@unique([email_id, model_id])       // 1 model classifies an email only once
+}

@@ -1,12 +1,10 @@
 import NextAuth, { AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import { prisma } from "@/lib/prisma";
+import { updateAccountTokens, getAccountByUserId } from "@/lib/db-service";
 
-/**
- * Takes a token, and returns a new token with updated
- * `accessToken` and `accessTokenExpires`. If an error occurs,
- * returns the old token and an error property
- */
-async function refreshAccessToken(token: any) {
+async function refreshAccessToken(account: any) {
   try {
     const url =
       "https://oauth2.googleapis.com/token?" +
@@ -14,7 +12,7 @@ async function refreshAccessToken(token: any) {
         client_id: process.env.GOOGLE_CLIENT_ID as string,
         client_secret: process.env.GOOGLE_CLIENT_SECRET as string,
         grant_type: "refresh_token",
-        refresh_token: token.refreshToken,
+        refresh_token: account.refresh_token,
       });
 
     const response = await fetch(url, {
@@ -30,23 +28,26 @@ async function refreshAccessToken(token: any) {
       throw refreshedTokens;
     }
 
-    return {
-      ...token,
-      accessToken: refreshedTokens.access_token,
-      accessTokenExpires: Date.now() + refreshedTokens.expires_in * 1000,
-      refreshToken: refreshedTokens.refresh_token ?? token.refreshToken, // Fall back to old refresh token
-    };
+    // Update account in DB
+    await updateAccountTokens(
+      account.id,
+      refreshedTokens.access_token,
+      Math.floor(Date.now() / 1000 + refreshedTokens.expires_in),
+      refreshedTokens.refresh_token ?? account.refresh_token
+    );
+
+    return refreshedTokens.access_token;
   } catch (error) {
     console.error("Error refreshing access token", error);
-
-    return {
-      ...token,
-      error: "RefreshAccessTokenError",
-    };
+    return null;
   }
 }
 
 export const authOptions: AuthOptions = {
+  adapter: PrismaAdapter(prisma) as any,
+  session: {
+    strategy: "jwt", // keeping jwt strategy to avoid breaking client-side session expectations
+  },
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID as string,
@@ -62,28 +63,33 @@ export const authOptions: AuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, account }) {
-      // Initial sign in
-      if (account) {
-        return {
-          ...token,
-          accessToken: account.access_token,
-          accessTokenExpires: account.expires_at ? account.expires_at * 1000 : 0,
-          refreshToken: account.refresh_token,
-        };
-      }
-
-      // Return previous token if the access token has not expired yet
-      if (Date.now() < (token as any).accessTokenExpires) {
+    async jwt({ token, account, user }) {
+      // On initial sign in, account is provided by NextAuth, but PrismaAdapter also saves it to DB.
+      if (account && user) {
+        token.userId = user.id;
         return token;
       }
-
-      // Access token has expired, try to update it
-      return refreshAccessToken(token);
+      return token;
     },
     async session({ session, token }: any) {
-      session.accessToken = token.accessToken;
-      session.error = token.error;
+      if (token?.userId) {
+        const account = await getAccountByUserId(token.userId as string);
+
+        if (account) {
+          let accessToken = account.access_token;
+          
+          // Check if token expired
+          if (account.expires_at && Date.now() > account.expires_at * 1000) {
+            accessToken = await refreshAccessToken(account);
+            if (!accessToken) {
+              session.error = "RefreshAccessTokenError";
+            }
+          }
+
+          session.accessToken = accessToken;
+        }
+      }
+      
       return session;
     },
   },

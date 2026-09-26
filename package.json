@@ -9,7 +9,9 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@auth/prisma-adapter": "^2.11.3",
     "@base-ui/react": "^1.8.0",
+    "@prisma/client": "^5.22.0",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.3.0",
     "date-fns": "^4.4.0",
@@ -32,8 +34,18 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.5",
+    "prisma": "5.22.0",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "workerd",
+      "prisma",
+      "@prisma/engines",
+      "@prisma/client"
+    ]
   },
   "packageManager": "pnpm@12.5.1"
 }
