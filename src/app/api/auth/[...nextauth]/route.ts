@@ -2,7 +2,7 @@ import NextAuth, { AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
-import { updateAccountTokens, getAccountByUserId } from "@/lib/db-service";
+import { updateAccountTokens, getAccountByUserId } from "@/lib/services/db-service";
 
 async function refreshAccessToken(account: any) {
   try {
