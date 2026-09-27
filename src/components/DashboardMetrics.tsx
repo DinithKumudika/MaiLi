@@ -1,5 +1,7 @@
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useDashboard } from "@/contexts/DashboardContext";
+import { useState } from "react";
 
 export default function DashboardMetrics() {
   const {
@@ -16,6 +18,8 @@ export default function DashboardMetrics() {
     startClassification: onStartClassification,
     stopClassification: onStopClassification,
   } = useDashboard();
+
+  const [runForAll, setRunForAll] = useState(false);
 
   const emailsCount = emails.length;
 
@@ -107,7 +111,22 @@ export default function DashboardMetrics() {
         )}
       </div>
 
-      <div className="flex items-center pr-2">
+      <div className="flex items-center gap-4 pr-2">
+        {!isClassifying && (
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="run-for-all" 
+              checked={runForAll} 
+              onCheckedChange={(checked) => setRunForAll(checked as boolean)}
+            />
+            <label
+              htmlFor="run-for-all"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-muted-foreground whitespace-nowrap"
+            >
+              Run for all
+            </label>
+          </div>
+        )}
         {isClassifying ? (
           <Button
             onClick={onStopClassification}
@@ -119,7 +138,7 @@ export default function DashboardMetrics() {
           </Button>
         ) : (
           <Button
-            onClick={onStartClassification}
+            onClick={() => onStartClassification(runForAll)}
             disabled={emailsCount === 0}
             size="lg"
             className="px-8 font-semibold"

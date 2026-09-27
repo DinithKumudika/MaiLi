@@ -49,7 +49,7 @@ export class ClassificationRunner {
     this.listeners.forEach(l => l(this.state));
   }
 
-  public async start() {
+  public async start(runForAll: boolean = false) {
     if (this.state.isClassifying) return;
     this.updateState({
       isClassifying: true,
@@ -83,7 +83,7 @@ export class ClassificationRunner {
       const batchPromises = batch.map(async (email, batchIndex) => {
         const actualIndex = i + batchIndex;
         
-        if (email.classification) {
+        if (!runForAll && email.classification) {
           return { success: true, cost: 0 };
         }
 
@@ -96,7 +96,7 @@ export class ClassificationRunner {
             const res = await fetch("/api/classify", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ email, runId }),
+              body: JSON.stringify({ email, runId, force: runForAll }),
               signal: this.abortController?.signal,
             });
 

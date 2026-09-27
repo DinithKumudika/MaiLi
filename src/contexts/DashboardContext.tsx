@@ -23,7 +23,7 @@ interface DashboardContextType extends InboxSyncState, ClassificationState {
   sortOrder: "asc" | "desc";
   setSortOrder: (order: "asc" | "desc") => void;
   filteredAndSortedEmails: Email[];
-  startClassification: () => void;
+  startClassification: (runForAll?: boolean) => void;
   stopClassification: () => void;
 }
 
@@ -166,7 +166,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       sortOrder,
       setSortOrder,
       filteredAndSortedEmails,
-      startClassification: () => classificationRunner?.start(),
+      startClassification: (runForAll?: boolean) => classificationRunner?.start(runForAll),
       stopClassification: () => classificationRunner?.stop(),
     }}>
       {children}

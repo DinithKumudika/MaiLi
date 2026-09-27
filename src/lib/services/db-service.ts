@@ -44,8 +44,23 @@ export async function saveClassificationRecord(data: {
   outputTok: number;
   speed: number;
 }) {
-  return await prisma.classification.create({
-    data: {
+  return await prisma.classification.upsert({
+    where: {
+      email_id_model_id: {
+        email_id: data.emailId,
+        model_id: data.modelId,
+      },
+    },
+    update: {
+      category: data.category,
+      urgency: data.urgency,
+      needs_reply: data.needsReply,
+      cost: data.cost,
+      input_tok: data.inputTok,
+      output_tok: data.outputTok,
+      speed: data.speed,
+    },
+    create: {
       email_id: data.emailId,
       model_id: data.modelId,
       category: data.category,

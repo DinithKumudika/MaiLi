@@ -23,7 +23,7 @@ export interface ClassificationResult {
 
 const MODEL_ID = "jev-latest";
 
-export async function classifyEmail(email: EmailPayload, runId?: string): Promise<ClassificationResult> {
+export async function classifyEmail(email: EmailPayload, runId?: string, force?: boolean): Promise<ClassificationResult> {
   const subject = email.subject || "";
   const from = email.from || "";
   const bodyText = typeof email.body === "string" ? email.body : JSON.stringify(email.body || {});
@@ -35,17 +35,19 @@ export async function classifyEmail(email: EmailPayload, runId?: string): Promis
   // 2. Upsert Email record
   await upsertEmailRecord(email.id, subject, from, content_hash);
 
-  // 3. Check for existing classification
-  const existingClass = await getExistingClassification(email.id, MODEL_ID);
+  // 3. Check for existing classification if not forcing
+  if (!force) {
+    const existingClass = await getExistingClassification(email.id, MODEL_ID);
 
-  if (existingClass) {
-    return {
-      category: { value: existingClass.category, probability: 1.0 },
-      isUrgentReply: { value: existingClass.needs_reply, probability: 1.0 },
-      urgency: { value: `${existingClass.urgency}/5`, probability: 1.0 },
-      cost: existingClass.cost || 0,
-      _cached: true,
-    };
+    if (existingClass) {
+      return {
+        category: { value: existingClass.category, probability: 1.0 },
+        isUrgentReply: { value: existingClass.needs_reply, probability: 1.0 },
+        urgency: { value: `${existingClass.urgency}/5`, probability: 1.0 },
+        cost: existingClass.cost || 0,
+        _cached: true,
+      };
+    }
   }
 
   // 4 & 5. Model Inference via Adapter

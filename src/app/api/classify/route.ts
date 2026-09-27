@@ -3,13 +3,13 @@ import { classifyEmail } from "@/lib/services/email-classifier";
 
 export async function POST(req: Request) {
   try {
-    const { email, runId } = await req.json();
+    const { email, runId, force } = await req.json();
 
     if (!email || !email.body || !email.id) {
       return NextResponse.json({ error: "Missing email data or id" }, { status: 400 });
     }
 
-    const classificationResult = await classifyEmail(email, runId);
+    const classificationResult = await classifyEmail(email, runId, force);
     
     return NextResponse.json(classificationResult);
   } catch (error: any) {
