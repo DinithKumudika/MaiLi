@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { google } from "googleapis";
 import { authOptions } from "../auth/[...nextauth]/route";
+import { prisma } from "@/lib/prisma";
+import { MockEmail } from "@prisma/client";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -10,6 +12,46 @@ export async function GET(request: Request) {
 
   if (!session || !(session as any).accessToken) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (process.env.RUN_IN_MOCK === "true") {
+    try {
+      const countOnly = searchParams.get("countOnly") === "true";
+      if (countOnly) {
+        const total = await prisma.mockEmail.count();
+        return NextResponse.json({ total });
+      }
+
+      const skip = pageToken ? parseInt(pageToken, 10) : 0;
+      const take = 15;
+
+      const mockEmails = await prisma.mockEmail.findMany({
+        skip,
+        take,
+        orderBy: { id: "asc" },
+      });
+
+      const nextSkip = mockEmails.length === take ? skip + take : undefined;
+
+      const formattedMockEmails = mockEmails.map((email: MockEmail) => ({
+        id: email.id,
+        threadId: email.id,
+        subject: email.subject,
+        from: email.from,
+        to: email.to || "",
+        date: email.date || "",
+        snippet: email.snippet || "",
+        body: email.body,
+      }));
+
+      return NextResponse.json({
+        emails: formattedMockEmails,
+        nextPageToken: nextSkip ? nextSkip.toString() : undefined,
+      });
+    } catch (error: any) {
+      console.error("Error fetching mock emails:", error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
   }
 
   try {

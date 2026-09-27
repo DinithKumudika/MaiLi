@@ -114,3 +114,13 @@ model Classification {
   
   @@unique([email_id, model_id])       // 1 model classifies an email only once
 }
+
+model MockEmail {
+  id      String  @id @default(cuid())
+  subject String
+  from    String
+  to      String?
+  date    String?
+  snippet String?
+  body    String
+}
