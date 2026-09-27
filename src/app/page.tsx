@@ -44,16 +44,7 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <header className="bg-muted/30 border-b border-border px-6 py-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-foreground">Email Classifier</h1>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-muted-foreground">{session.user?.email}</span>
-          <Button variant="outline" size="sm" onClick={() => signOut()}>
-            Sign Out
-          </Button>
-        </div>
-      </header>
+    <div className="flex flex-col flex-1 overflow-hidden">
       <main className="flex-1 flex flex-col overflow-hidden bg-background">
         <Dashboard />
       </main>

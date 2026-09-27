@@ -44,8 +44,31 @@ export async function GET(request: Request) {
         body: email.body,
       }));
 
+      // Query DB for existing classifications for mock emails
+      const emailIds = formattedMockEmails.map(m => m.id);
+      const existingClassifications = await prisma.classification.findMany({
+        where: { email_id: { in: emailIds } },
+      });
+
+      const classificationsMap = new Map();
+      existingClassifications.forEach(c => {
+        classificationsMap.set(c.email_id, {
+          category: { value: c.category, probability: 1.0 },
+          urgency: { value: `${c.urgency}/5`, probability: 1.0 },
+          isUrgentReply: { value: c.needs_reply, probability: 1.0 },
+          cost: c.cost || 0,
+          _cached: true,
+        });
+      });
+
+      // Attach classifications to mock emails
+      const emailsWithClassifications = formattedMockEmails.map(m => {
+        const classification = classificationsMap.get(m.id);
+        return classification ? { ...m, classification } : m;
+      });
+
       return NextResponse.json({
-        emails: formattedMockEmails,
+        emails: emailsWithClassifications,
         nextPageToken: nextSkip ? nextSkip.toString() : undefined,
       });
     } catch (error: any) {
@@ -139,8 +162,31 @@ export async function GET(request: Request) {
       });
     }
 
+    // Query DB for existing classifications for these emails
+    const emailIds = fullMessages.map(m => m.id);
+    const existingClassifications = await prisma.classification.findMany({
+      where: { email_id: { in: emailIds } },
+    });
+
+    const classificationsMap = new Map();
+    existingClassifications.forEach(c => {
+      classificationsMap.set(c.email_id, {
+        category: { value: c.category, probability: 1.0 },
+        urgency: { value: `${c.urgency}/5`, probability: 1.0 },
+        isUrgentReply: { value: c.needs_reply, probability: 1.0 },
+        cost: c.cost || 0,
+        _cached: true,
+      });
+    });
+
+    // Attach classifications to fullMessages
+    const emailsWithClassifications = fullMessages.map(m => {
+      const classification = classificationsMap.get(m.id);
+      return classification ? { ...m, classification } : m;
+    });
+
     return NextResponse.json({ 
-      emails: fullMessages,
+      emails: emailsWithClassifications,
       nextPageToken: listRes.data.nextPageToken 
     });
   } catch (error: any) {

@@ -46,9 +46,5 @@ function DashboardContent() {
 }
 
 export default function Dashboard() {
-  return (
-    <DashboardProvider>
-      <DashboardContent />
-    </DashboardProvider>
-  );
+  return <DashboardContent />;
 }

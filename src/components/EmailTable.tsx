@@ -6,7 +6,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import UrgencyIndicator from "./UrgencyIndicator";
 import { Card } from "@/components/ui/card";
@@ -24,7 +23,7 @@ export default function EmailTable() {
   const totalEmailsCount = emails.length;
 
   return (
-    <Card className="flex-1 overflow-hidden flex flex-col shadow-sm">
+    <Card className="flex-1 overflow-hidden flex flex-col shadow-none border-0 bg-transparent">
       {loadingEmails && totalEmailsCount === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center gap-4">
           <div className="flex items-center gap-2">
@@ -37,15 +36,15 @@ export default function EmailTable() {
           </p>
         </div>
       ) : (
-        <div className="flex-1 overflow-auto">
-          <Table>
-            <TableHeader className="bg-muted/50 sticky top-0 backdrop-blur-sm z-10">
+        <div className="flex-1 overflow-hidden relative rounded-xl border border-white/5 bg-black/20">
+          <Table wrapperClassName="h-full overflow-auto">
+            <TableHeader className="bg-background/80 backdrop-blur-md sticky top-0 z-10 border-b border-white/5">
               <TableRow>
-                <TableHead>Subject</TableHead>
-                <TableHead>From</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Urgency</TableHead>
-                <TableHead>Needs Reply</TableHead>
+                <TableHead className="w-[35%]">Subject</TableHead>
+                <TableHead className="w-[25%]">From</TableHead>
+                <TableHead className="w-[15%]">Category</TableHead>
+                <TableHead className="w-[10%]">Urgency</TableHead>
+                <TableHead className="w-[15%] text-right pr-6">Needs Reply</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -78,51 +77,39 @@ export default function EmailTable() {
                         isSelected && "bg-muted/50 hover:bg-muted/80"
                       )}
                     >
-                      <TableCell className="font-medium max-w-[300px] truncate">
+                      <TableCell className="font-medium max-w-[300px] truncate text-foreground/90">
                         {email.subject || "(No Subject)"}
                       </TableCell>
-                      <TableCell className="text-muted-foreground max-w-[200px] truncate">
+                      <TableCell className="text-muted-foreground/70 font-mono text-[12px] max-w-[200px] truncate tracking-tight">
                         {email.from}
                       </TableCell>
                       <TableCell>
                         {email.classification ? (
-                          <Badge variant="secondary" className="capitalize">
+                          <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-white/5 text-muted-foreground border border-white/5">
                             {email.classification.category?.value || "N/A"}
-                          </Badge>
-                        ) : (
-                          <span className="text-muted-foreground text-xs">
-                            -
                           </span>
+                        ) : (
+                          <span className="text-muted-foreground/30 text-xs">-</span>
                         )}
                       </TableCell>
                       <TableCell>
                         {email.classification ? (
-                          <UrgencyIndicator
-                            scoreStr={email.classification.urgency?.value}
-                          />
+                          <UrgencyIndicator scoreStr={email.classification.urgency?.value} />
                         ) : (
-                          <span className="text-muted-foreground text-xs">
-                            -
-                          </span>
+                          <span className="text-muted-foreground/30 text-xs">-</span>
                         )}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-right pr-6">
                         {email.classification ? (
-                          <Badge
-                            variant={
-                              email.classification.isUrgentReply?.value
-                                ? "destructive"
-                                : "secondary"
-                            }
-                          >
-                            {email.classification.isUrgentReply?.value
-                              ? "Yes"
-                              : "No"}
-                          </Badge>
+                          email.classification.isUrgentReply?.value ? (
+                            <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold bg-red-500/10 text-red-400 border border-red-500/20 uppercase tracking-wider">
+                              Urgent
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground/50 text-[12px]">No</span>
+                          )
                         ) : (
-                          <span className="text-muted-foreground text-xs">
-                            -
-                          </span>
+                          <span className="text-muted-foreground/30 text-xs">-</span>
                         )}
                       </TableCell>
                     </TableRow>
