@@ -14,7 +14,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (process.env.RUN_IN_MOCK === "true") {
+  if (process.env.RUN_IN_MOCK_EMAIL === "true") {
     try {
       const countOnly = searchParams.get("countOnly") === "true";
       if (countOnly) {

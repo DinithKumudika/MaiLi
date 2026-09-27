@@ -9,6 +9,7 @@ export type EmailClassification = {
   category?: { value: string; probability: number };
   isUrgentReply?: { value: boolean; probability: number };
   urgency?: { value: string; probability: number };
+  cost?: number;
 };
 
 export type Email = {

@@ -3,7 +3,7 @@ import { OpenRouterAdapter } from "./OpenRouterAdapter";
 import { MockAdapter } from "./MockAdapter";
 
 export function getModelAdapter(): ModelAdapter {
-  if (process.env.RUN_IN_MOCK === "true") {
+  if (process.env.RUN_IN_MOCK_MODEL === "true") {
     return new MockAdapter();
   }
   
