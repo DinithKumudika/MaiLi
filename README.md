@@ -1,8 +1,11 @@
-# AI Email Classifier based on System One AI Models
+<div align="center">
+  <img src="public/logo.svg" alt="M@iLi Logo" width="100" />
+  <h1>M@iLi</h1>
+  <p><b>Signal through the noise.</b></p>
+  <p>An AI-assisted email management solution for businesses that connects to your Gmail account to intelligently fetch, analyze, and triage your emails in real-time.</p>
+</div>
 
-A Proof of Concept (POC) web application that connects to your Gmail account to intelligently fetch, analyze, and classify your emails in real-time. 
-
-This project demonstrates how to handle continuous background synchronization of your Emails while concurrently processing that data through a [System One AI Model](https://docs.typesafe.ai/concepts/system-one) (e.g., [Jev](https://typesafe.ai/blog/introducing-system-one-models-and-jev)) to categorize emails by urgency, intent, and actionable context.
+This product demonstrates how to handle continuous background synchronization of your emails while concurrently processing that data through a [System One AI Model](https://docs.typesafe.ai/concepts/system-one) (e.g., [Jev](https://typesafe.ai/blog/introducing-system-one-models-and-jev)) to categorize communications by urgency, intent, and actionable context.
 
 ## 🚀 Features
 
@@ -91,9 +94,7 @@ OPENROUTER_API_KEY=your_api_key
 # Mock Modes
 # Set to true to use local seeded mock data instead of the real Gmail API
 RUN_IN_MOCK_EMAIL=true
-
-
-DISM /Online /Cleanup-Image /AnalyzeComponentStore# Set to true to use a mock model instead of calling the actual AI Model Provider API
+# Set to true to use a mock model instead of calling the actual AI Model Provider API
 RUN_IN_MOCK_MODEL=true
 ```
 
