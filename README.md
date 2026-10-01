@@ -12,7 +12,7 @@ This project demonstrates how to handle continuous background synchronization of
 - **Dynamic Dashboard:** A comprehensive UI built with shadcn/ui and TailwindCSS that allows filtering, sorting, and viewing metrics (time taken, cost of classification) in real-time as background tasks run.
 - **Resilient Workers:** The background analysis worker dynamically processes emails as they arrive without dropping state, ensuring every email is analyzed even if synchronization is throttled.
 - **Data Persistency:** Uses Prisma ORM with SQLite to securely persist fetched emails and their AI classifications, preventing redundant API calls and repetitive LLM costs.
-- **Mock Data Support:** Includes a built-in mock mode (`RUN_IN_MOCK=true`) and database seeder for offline development and UI testing without hitting live Gmail or LLM APIs.
+- **Mock Data Support:** Includes built-in mock modes (`RUN_IN_MOCK_EMAIL=true` and `RUN_IN_MOCK_MODEL=true`) and a database seeder for offline development and UI testing without hitting live Gmail or LLM APIs.
 
 ## 💼 Practical Use Cases
 
@@ -88,8 +88,13 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret
 # OpenRouter API Key for LLM Classification
 OPENROUTER_API_KEY=your_api_key
 
-# Mock Mode (Set to true to use local seeded mock data instead of the real Gmail API)
-RUN_IN_MOCK=true
+# Mock Modes
+# Set to true to use local seeded mock data instead of the real Gmail API
+RUN_IN_MOCK_EMAIL=true
+
+
+DISM /Online /Cleanup-Image /AnalyzeComponentStore# Set to true to use a mock model instead of calling the actual AI Model Provider API
+RUN_IN_MOCK_MODEL=true
 ```
 
 ### 4. Database Setup
